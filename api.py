@@ -67,6 +67,15 @@ class BaseField:
         return not len(self.validate_errors)
 
 
+"""
+По комментарию к дз номер 3.
+class CustomValidationError(Exception):
+    def __init__(self, message="Значение поля CharField должно быть типом string"):
+        self.message = message
+        super().__init__(self.message)
+"""
+
+
 class CharField(BaseField):
     """
         Класс текстового поля
@@ -74,25 +83,39 @@ class CharField(BaseField):
 
     def validate(self):
         if super().validate() and self.value not in EMPTY_FIELDS:
-            # print('validate CHAR')
             if not isinstance(self.value, str):
                 self.validate_errors.append(
                     "Значение поля {} должно быть типом string".format(self.__class__.__name__)
                 )
             return not len(self.validate_errors), self.validate_errors
 
+    """   
+    По комментарию к дз номер 3, метод бросает кастомную ошибку.
+    def validate(self):
+        if super().validate() and self.value not in EMPTY_FIELDS:
+            if not isinstance(self.value, str):
+                raise CustomValidationError
+    """
+
 
 class ArgumentsField(BaseField):
+    """
+        Класс поля аргументов/словаря.
+    """
+
     def validate(self):
-        super().validate()
-        if not isinstance(self.value, dict):
-            self.validate_errors.append(
-                "Значение поля {} должно быть типом словарь".format(self.__class__.__name__)
-            )
-            return print(not len(self.validate_errors), self.validate_errors)
+        if super().validate():
+            if not isinstance(self.value, dict):
+                self.validate_errors.append(
+                  "Значение поля {} должно быть типом словарь".format(self.__class__.__name__)
+                )
+                return not len(self.validate_errors), self.validate_errors
 
 
 class EmailField(CharField):
+    """
+        Класс поля email.
+    """
 
     def validate(self):
         if super().validate():
@@ -104,6 +127,9 @@ class EmailField(CharField):
 
 
 class PhoneField(BaseField):
+    """
+        Класс поля телефона.
+    """
 
     def validate(self):
         if super().validate() and self.value not in EMPTY_FIELDS:
@@ -122,6 +148,10 @@ class PhoneField(BaseField):
 
 
 class DateField(BaseField):
+    """
+        Класс поля даты.
+    """
+
     def validate(self):
         if super().validate() and self.value not in EMPTY_FIELDS:
             try:
@@ -135,6 +165,10 @@ class DateField(BaseField):
 
 
 class BirthDayField(DateField):
+    """
+        Класс поля даты рождения.
+    """
+
     def validate(self):
         if super().validate():
             current_date = datetime.today()
@@ -148,6 +182,10 @@ class BirthDayField(DateField):
 
 
 class GenderField(BaseField):
+    """
+        Класс поля гендера.
+    """
+
     def validate(self):
         if super().validate() and self.value not in EMPTY_FIELDS:
             if self.value not in GENDERS:
@@ -158,6 +196,10 @@ class GenderField(BaseField):
 
 
 class ClientIDsField(BaseField):
+    """
+        Класс поля id клиентов.
+    """
+
     def validate(self):
         if super().validate() and self.value not in EMPTY_FIELDS:
             if not isinstance(self.value, list):
@@ -172,14 +214,17 @@ class ClientIDsField(BaseField):
         return not len(self.validate_errors)
 
 
-class BaseRequest(object):
+class BaseRequest:
+    """
+        Класс базового request.
+    """
 
     def validate_request(self):
         errors = []
         fields = dict((name, getattr(self, name)) for name in dir(self) if
                       not name.startswith('__') and not callable((getattr(self, name))))
         for field in fields:
-            if type(fields[field]) == bool:
+            if isinstance(fields[field], bool):
                 pass
             elif not fields[field].validate():
                 errors += fields[field].validate_errors
@@ -204,7 +249,6 @@ class OnlineScoreRequest(BaseRequest):
     gender = GenderField(required=False, nullable=True)
 
     def __init__(self, **kwargs):
-        super().__init__()
         self.first_name.value = kwargs.get('first_name', None)
         self.last_name.value = kwargs.get('last_name', None)
         self.email.value = kwargs.get('email', None)
@@ -269,19 +313,18 @@ def online_score_handler(arguments, is_admin, context, store):
     context.setdefault('has', request.get_not_empty_fields())
     if not valid:
         return '\n'.join(errors), INVALID_REQUEST
+    if is_admin:
+        return {"score": int(ADMIN_SALT)}, OK
     else:
-        if is_admin:
-            return {"score": int(ADMIN_SALT)}, OK
-        else:
-            score = scoring.get_score(store=store,
-                                      phone=request.phone.value,
-                                      email=request.email.value,
-                                      birthday=request.birthday.value,
-                                      gender=request.gender.value,
-                                      first_name=request.first_name.value,
-                                      last_name=request.last_name.value
-                                      )
-            return {"score": score}, OK
+        score = scoring.get_score(store=store,
+                                  phone=request.phone.value,
+                                  email=request.email.value,
+                                  birthday=request.birthday.value,
+                                  gender=request.gender.value,
+                                  first_name=request.first_name.value,
+                                  last_name=request.last_name.value
+                                  )
+        return {"score": score}, OK
 
 
 def clients_interests_handler(arguments, is_admin, context, store):
@@ -306,13 +349,15 @@ def method_handler(request, ctx, store):
 
     if valid:
         if not check_auth(r):
-            return ERRORS[FORBIDDEN], FORBIDDEN
+            response = 'Authorisation error'
+            return response, FORBIDDEN
 
         if r.method.value not in METHODS.keys():
-            return ERRORS[NOT_FOUND], NOT_FOUND
+            response = 'Unsupported method'
+            return response, NOT_FOUND
 
         response = METHODS[r.method.value](r.arguments, r.is_admin, ctx, store)
-        return response
+        return response, OK
     else:
         return '\n'.join(errors), INVALID_REQUEST
 
@@ -347,7 +392,6 @@ class MainHTTPHandler(BaseHTTPRequestHandler):
                     code = INTERNAL_ERROR
             else:
                 code = NOT_FOUND
-
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.end_headers()

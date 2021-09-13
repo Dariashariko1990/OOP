@@ -2,7 +2,6 @@ import hashlib
 import datetime
 import functools
 import unittest
-
 import api
 
 
@@ -96,7 +95,6 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(api.OK, code, arguments)
         score = response.get("score")
         self.assertTrue(isinstance(score, (int, float)) and score >= 0, arguments)
-        print(self.context["has"], arguments.keys())
         self.assertEqual(sorted(self.context["has"]), sorted(arguments.keys()))
 
     def test_ok_score_admin_request(self):

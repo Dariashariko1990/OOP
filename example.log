@@ -1,5 +1,3 @@
-[2021.09.13 14:30:18] I Starting server at 8080
-[2021.09.13 14:30:20] I /method/: b'{"account": "horns&hoofs", "login": "h&f", "method": "clients_interests", "arguments": {"client_ids": [1, 2, 3], "date": "13.09.2021"}, "token": "55cc9ce545bcd144300fe9efc28e65d415b923ebb6be1e19d2750a2c03e80dd209a27954dca045e5bb12418e7d89b6d718a9e35af34e14e1d5bcd5a08f21fc95"}\n' c06893c202cc403795ce3038432c128c
-[2021.09.13 14:30:20] I {'request_id': 'c06893c202cc403795ce3038432c128c', 'nclients': 3, 'response': ({1: ['cinema', 'music'], 2: ['pets', 'tv'], 3: ['tv', 'otus']}, 200), 'code': 200}
-[2021.09.13 14:32:08] I /method/: b'{"account": "horns&hoofs", "login": "h&f", "method": "online_score", "arguments": {"phone": "79175002040", "email": "stupnikov@otus.ru"}, "token": "55cc9ce545bcd144300fe9efc28e65d415b923ebb6be1e19d2750a2c03e80dd209a27954dca045e5bb12418e7d89b6d718a9e35af34e14e1d5bcd5a08f21fc95"}\n' a0ea6fe011124495805a1572c2ef87d4
-[2021.09.13 14:32:08] I {'request_id': 'a0ea6fe011124495805a1572c2ef87d4', 'has': ['EmailField', 'PhoneField'], 'response': ({'score': 3.0}, 200), 'code': 200}
+[2021.10.22 11:07:08] I Starting server at 8080
+[2021.10.22 11:07:10] I /method/: b'{"account": "horns&hoofs", "login": "h&f", "method": "clients_interests", "token": "55cc9ce545bcd144300fe9efc28e65d415b923ebb6be1e19d2750a2c03e80dd209a27954dca045e5bb12418e7d89b6d718a9e35af34e14e1d5bcd5a08f21fc95", "arguments": {"client_ids": [1, 2], "date": "9.07.2017"}}' e4cda19cc6674412b4401e07fcbf78fe
+[2021.10.22 11:07:10] I {'request_id': 'e4cda19cc6674412b4401e07fcbf78fe', 'nclients': 2, 'response': {1: ['geek', 'hi-tech'], 2: ['sport', 'travel']}, 'code': 200}
